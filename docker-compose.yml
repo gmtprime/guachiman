@@ -1,0 +1,23 @@
+version: '3.3'
+
+services:
+  migrator:
+    stdin_open: true
+    tty: true
+    command:
+      - /bin/bash
+      - -c
+      - |
+          pip install -r requirements/base.txt
+          python migrate.py
+    depends_on:
+      - postgres
+    build: .
+    volumes:
+      - type: bind
+        source: ../python_backend_db/
+        target: /opt/db
+  postgres:
+    image: 'postgres:latest'
+    ports:
+      - '5432:5432'
