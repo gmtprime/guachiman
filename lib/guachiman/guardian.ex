@@ -4,11 +4,6 @@ defmodule Guachiman.Guardian do
   """
   use Guardian, otp_app: :guachiman
 
-  alias BitcloudDB.Repo
-  alias BitcloudDB.Schemas.AuthUser
-
-  import Ecto.Query
-
   ###########
   # Callbacks
 
@@ -21,6 +16,7 @@ defmodule Guachiman.Guardian do
   def subject_for_token(%{id: id}, _claims) do
     {:ok, to_string(id)}
   end
+
   def subject_for_token(_resource, _claims) do
     {:error, "Invalid subject"}
   end
@@ -35,9 +31,10 @@ defmodule Guachiman.Guardian do
     if String.contains?(subject, "@clients") do
       {:ok, subject}
     else
-      get_resource_from_db(subject)
+      resolve_resource(subject)
     end
   end
+
   def resource_from_claims(_claims) do
     {:error, "Invalid subject"}
   end
@@ -59,20 +56,40 @@ defmodule Guachiman.Guardian do
   #########
   # Helpers
 
-  @doc false
-  def get_resource_from_db(resource_id) do
-    query =
-      AuthUser
-      |> preload(:organization)
-      |> where([a], a.user_id == ^resource_id)
-      |> select([a], a)
-    case Repo.one(query) do
-      nil ->
-        {:error, "Invalid resource"}
-      %AuthUser{} = resource ->
-        {:ok, resource}
+  @doc """
+  Use `resource` attribute from Guachiman's config to retrieve a configuration.
+
+  By default use `resource` function from Guachiman.Guardian
+  """
+  def resolve_resource(subject) do
+    {mod, fun, args} = Application.get_env(:guachiman, :resource, {__MODULE__, :resource, []})
+
+    case apply(mod, fun, [subject | args]) do
+      {:ok, resource} -> {:ok, resource}
+      {:error, error} -> {:error, error}
+      _ -> {:error, "Invalid resource"}
     end
   end
+
+  @doc false
+  def resource(subject) do
+    {:ok, subject}
+  end
+
+  #  @doc false
+  #  def get_resource_from_db(resource_id) do
+  #    query =
+  #      AuthUser
+  #      |> preload(:organization)
+  #      |> where([a], a.user_id == ^resource_id)
+  #      |> select([a], a)
+  #    case Repo.one(query) do
+  #      nil ->
+  #        {:error, "Invalid resource"}
+  #      %AuthUser{} = resource ->
+  #        {:ok, resource}
+  #    end
+  #  end
 
   @doc false
   def verify_audience(%{"aud" => audience}) do
@@ -82,6 +99,7 @@ defmodule Guachiman.Guardian do
       {:error, "Invalid audience"}
     end
   end
+
   def verify_audience(_) do
     {:error, "Audience is not specified"}
   end
@@ -90,10 +108,12 @@ defmodule Guachiman.Guardian do
   def is_valid_audience?(audience) when is_binary(audience) do
     audience in get_valid_audiences()
   end
+
   def is_valid_audience?(audiences) when is_list(audiences) do
     valid_audiences = get_valid_audiences()
     Enum.any?(audiences, fn audience -> audience in valid_audiences end)
   end
+
   def is_valid_audience?(_) do
     false
   end
@@ -103,8 +123,10 @@ defmodule Guachiman.Guardian do
     case config(:audience) do
       audience when is_binary(audience) ->
         [audience]
+
       audiences when is_list(audiences) ->
         audiences
+
       _ ->
         []
     end
@@ -118,6 +140,7 @@ defmodule Guachiman.Guardian do
       {:error, "Invalid scope"}
     end
   end
+
   def verify_scope(_) do
     {:error, "Scope is not specified"}
   end
@@ -125,10 +148,12 @@ defmodule Guachiman.Guardian do
   @doc false
   def is_valid_scope?(scope) when is_binary(scope) do
     valid_scopes = get_valid_scopes()
+
     scope
     |> String.split()
     |> Enum.all?(fn scope -> scope in valid_scopes end)
   end
+
   def is_valid_scope?(_) do
     false
   end

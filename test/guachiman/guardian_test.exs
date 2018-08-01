@@ -3,11 +3,31 @@ defmodule Guachiman.GuardianTest do
 
   alias Guachiman.Guardian, as: GGuardian
 
-  import BitcloudDB.Factory
+  import Mox
+
+  #  import BitcloudDB.Factory
 
   setup do
-    :ok = Ecto.Adapters.SQL.Sandbox.checkout(BitcloudDB.Repo)
+    #    :ok = Ecto.Adapters.SQL.Sandbox.checkout(BitcloudDB.Repo)
+    :ok
   end
+
+  #  defmodule Guachiman.Resource.Valid do
+  #    @moduledoc false
+  #
+  #    @behaviour Guachiman.Resource
+  #
+  #    def get(subject), do: {:ok, subject}
+  #
+  #  end
+  #
+  #  defmodule Guachiman.Resource.Invalid do
+  #    @moduledoc false
+  #
+  #    @behaviour Guachiman.Resource
+  #    
+  #    def get(subject), do: {:error, :subject_not_found}
+  #  end
 
   describe "subject_for_token/2" do
     test "Returns ID when the resources has it" do
@@ -19,10 +39,29 @@ defmodule Guachiman.GuardianTest do
     end
   end
 
-  describe "resource_from_claims/2" do
+  describe "resource_from_claims/1" do
     test "gets resource" do
-      %{user_id: id} = insert(:auth_user)
-      assert {:ok, %{user_id: ^id}} = GGuardian.resource_from_claims(%{"sub" => id})
+      id = "randomclient@clients"
+
+      Guachiman.Resource.Mock
+      |> expect(:get, fn ^id -> {:ok, id} end)
+
+      assert {:ok, ^id} = GGuardian.resource_from_claims(%{"sub" => id})
+    end
+
+    test "returns error while retrieving the resource" do
+      Guachiman.Resource.Mock
+      |> expect(:get, fn _ -> {:error, :invalid_subject} end)
+
+      assert {:error, :invalid_subject} =
+               GGuardian.resource_from_claims(%{"sub" => "somesubject"})
+    end
+
+    test "given resource function return unexpected value" do
+      Guachiman.Resource.Mock
+      |> expect(:get, fn _ -> nil end)
+
+      assert {:error, "Invalid resource"} = GGuardian.resource_from_claims(%{"sub" => "whatever"})
     end
   end
 end

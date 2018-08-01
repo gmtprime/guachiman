@@ -15,7 +15,7 @@ defmodule Guachiman.Auth0 do
   # Public API
 
   @doc """
-  Starts a AuthEx wrapper process with some optional `GenServer` `options`.
+  Starts an AuthEx wrapper process with some optional `GenServer` `options`.
   """
   @spec start_link() :: GenServer.on_start()
   @spec start_link(GenServer.options()) :: GenServer.on_start()
@@ -39,6 +39,7 @@ defmodule Guachiman.Auth0 do
     else
       [{:key, key} | _] ->
         key
+
       _ ->
         nil
     end
@@ -66,6 +67,7 @@ defmodule Guachiman.Auth0 do
   @doc false
   def update_file(table_name) do
     endpoint = Settings.guachiman_endpoint()
+
     with {:ok, %Tesla.Env{status: 200, body: body}} <- Tesla.get(endpoint),
          {:ok, decoded} <- Jason.decode(body),
          key = decoded |> Map.get("keys", []) |> List.first(),
@@ -74,8 +76,9 @@ defmodule Guachiman.Auth0 do
     else
       {:error, reason} = error ->
         Logger.error(fn ->
-          "Cannot update Auth0 key file due to #{inspect reason}"
+          "Cannot update Auth0 key file due to #{inspect(reason)}"
         end)
+
         error
     end
   end
