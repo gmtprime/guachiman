@@ -37,13 +37,14 @@ defmodule Guachiman.MixProject do
 
   defp deps do
     [
-      {:mox, "~> 0.3", only: :test},
+      {:cowboy, "~> 2.0", only: [:test, :dev]},
+      {:plug, "~> 1.0", only: [:test, :dev]},
       {:guardian, "~> 1.0"},
       {:tesla, "~> 1.1"},
       {:jason, "~> 1.1"},
       {:skogsra, "~> 0.2"},
       {:hackney, "~> 1.6"},
-      {:faker, "~> 0.10", only: [:test, :dev]}
+      {:mox, "~> 0.3", only: [:test]}
     ]
   end
 end

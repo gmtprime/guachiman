@@ -1,6 +1,6 @@
 defmodule Guachiman.Guardian do
   @moduledoc """
-  Token based authentication Guardian implementation for Auth0.
+  Guardian implementation for Token based authentication with AUTH0.
   """
   use Guardian, otp_app: :guachiman
 
@@ -100,9 +100,7 @@ defmodule Guachiman.Guardian do
     end
   end
 
-  def verify_audience(_) do
-    {:error, "Audience is not specified"}
-  end
+  def verify_audience(_), do: :ok
 
   @doc false
   def is_valid_audience?(audience) when is_binary(audience) do
@@ -141,9 +139,7 @@ defmodule Guachiman.Guardian do
     end
   end
 
-  def verify_scope(_) do
-    {:error, "Scope is not specified"}
-  end
+  def verify_scope(_), do: :ok
 
   @doc false
   def is_valid_scope?(scope) when is_binary(scope) do
@@ -160,6 +156,6 @@ defmodule Guachiman.Guardian do
 
   @doc false
   def get_valid_scopes do
-    Application.get_env(:guachiman, :auth0_scopes, [])
+    Application.get_env(:guachiman, :scopes, [])
   end
 end
