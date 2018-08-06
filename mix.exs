@@ -38,10 +38,9 @@ defmodule Guachiman.MixProject do
   defp deps do
     [
       {:cowboy, "~> 2.0", only: [:test, :dev]},
-      {:plug, "~> 1.0", only: [:test, :dev]},
+      {:plug, "~> 1.0"},
       {:guardian, "~> 1.0"},
       {:tesla, "~> 1.1"},
-      {:jason, "~> 1.1"},
       {:skogsra, "~> 0.2"},
       {:hackney, "~> 1.6"},
       {:mox, "~> 0.3", only: [:test]}

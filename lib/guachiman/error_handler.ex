@@ -1,5 +1,5 @@
 defmodule Guachiman.AuthErrorHandler do
-  def auth_error(conn, {type, reason} = err, _opts) do
+  def auth_error(conn, {type, reason}, _opts) do
     msg =
       case reason do
         :invalid_token -> "Invalid authentication token"
@@ -10,7 +10,7 @@ defmodule Guachiman.AuthErrorHandler do
       end
 
     err =
-      Jason.encode!(%{
+      Poison.encode!(%{
         error: to_string(type),
         message: msg
       })

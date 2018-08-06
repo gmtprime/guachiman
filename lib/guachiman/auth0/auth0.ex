@@ -69,7 +69,7 @@ defmodule Guachiman.Auth0 do
     endpoint = Settings.guachiman_endpoint()
 
     with {:ok, %Tesla.Env{status: 200, body: body}} <- Tesla.get(endpoint),
-         {:ok, decoded} <- Jason.decode(body),
+         {:ok, decoded} <- Poison.decode(body),
          key = decoded |> Map.get("keys", []) |> List.first(),
          true <- :ets.insert(table_name, {:key, key}) do
       :ok
