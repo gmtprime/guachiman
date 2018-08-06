@@ -8,7 +8,7 @@ defmodule Guachiman.Auth0 do
 
   require Logger
 
-  @table_name :jwks_json
+  @table_name Settings.guachiman_table_name()
   @table_options [:set, :public, :named_table, read_concurrency: true]
 
   ############
@@ -66,9 +66,11 @@ defmodule Guachiman.Auth0 do
 
   @doc false
   def update_file(table_name) do
-    endpoint = Settings.guachiman_endpoint()
+    auth0_domain = Settings.guachiman_auth0_domain()
 
-    with {:ok, %Tesla.Env{status: 200, body: body}} <- Tesla.get(endpoint),
+    unless auth0_domain, do: raise("Missing guachiman_auth0_domain config attribute")
+
+    with {:ok, %Tesla.Env{status: 200, body: body}} <- Tesla.get("https://#{auth0_domain}/.well-known/jwks.json"),
          {:ok, decoded} <- Poison.decode(body),
          key = decoded |> Map.get("keys", []) |> List.first(),
          true <- :ets.insert(table_name, {:key, key}) do

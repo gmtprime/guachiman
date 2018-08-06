@@ -13,9 +13,18 @@ defmodule Guachiman.Settings do
   Guachiman endpoint.
   """
   app_env(
-    :guachiman_endpoint,
+    :guachiman_auth0_domain,
     :guachiman,
-    :endpoint,
-    default: "https://1bitcloud.auth0.com/.well-known/jwks.json"
+    :auth0_domain
+  )
+
+  @doc """
+  Guachiman ets name
+  """
+  app_env(
+    :guachiman_table_name,
+    :guachiman,
+    :table_name,
+    default: :guachiman_jwks_json
   )
 end
