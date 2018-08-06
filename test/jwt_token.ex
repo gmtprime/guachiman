@@ -21,6 +21,9 @@ defmodule Guachiman.JWTTestHelper do
   Create a new token for the given resource's id, i.e,
   the JWT's `sub` claim.
   """
+  @spec create_token(binary(), map()) ::
+          {:ok, Guardian.Token.token(), Guardian.Token.claims()}
+          | {:error, any()}
   def create_token(resource_id, claims \\ %{}) do
     secret = JOSE.JWK.from_pem_file(@private_key_pem)
 
