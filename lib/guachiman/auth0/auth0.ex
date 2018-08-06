@@ -70,7 +70,8 @@ defmodule Guachiman.Auth0 do
 
     unless auth0_domain, do: raise("Missing guachiman_auth0_domain config attribute")
 
-    with {:ok, %Tesla.Env{status: 200, body: body}} <- Tesla.get("https://#{auth0_domain}/.well-known/jwks.json"),
+    with {:ok, %Tesla.Env{status: 200, body: body}} <-
+           Tesla.get("https://#{auth0_domain}/.well-known/jwks.json"),
          {:ok, decoded} <- Poison.decode(body),
          key = decoded |> Map.get("keys", []) |> List.first(),
          true <- :ets.insert(table_name, {:key, key}) do
