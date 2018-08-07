@@ -6,7 +6,7 @@ defmodule Guachiman.Auth0.Sandbox.JWTToken do
 
   ```
   config :guachiman,
-    update_module: Guachiman.Sandbox.JWTToken,
+    update_module: Guachiman.Auth0.Sandbox.JWTToken,
     audience: "some_audience"
   ```
 
