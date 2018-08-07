@@ -27,4 +27,14 @@ defmodule Guachiman.Settings do
     :table_name,
     default: :guachiman_jwks_json
   )
+
+  @doc """
+  Guachiman keys origin module
+  """
+  app_env(
+    :guachiman_update_module,
+    :guachiman,
+    :update_module,
+    default: Guachiman.Auth0
+  )
 end

@@ -33,8 +33,9 @@ defmodule Guachiman.Auth0 do
   def fetch(table_name \\ @table_name)
 
   def fetch(table_name) do
+    update_module = Settings.guachiman_update_module()
     with [] <- :ets.lookup(table_name, :key),
-         :ok <- update_file(table_name) do
+         :ok <- apply(update_module, :update_file, [table_name]) do
       fetch(table_name)
     else
       [{:key, key} | _] ->
@@ -56,8 +57,9 @@ defmodule Guachiman.Auth0 do
 
   @doc false
   def handle_info(:timeout, _state) do
+    update_module = Settings.guachiman_update_module()
     timeout = Settings.guachiman_update_timeout()
-    update_file(@table_name)
+    apply(update_module, :update_file, [@table_name])
     {:noreply, nil, timeout}
   end
 

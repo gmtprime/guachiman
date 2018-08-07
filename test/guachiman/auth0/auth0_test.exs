@@ -3,6 +3,17 @@ defmodule Guachiman.Auth0.Auth0Test do
 
   alias Guachiman.Auth0
 
+  import Tesla.Mock
+
+  setup do
+    mock fn _ ->
+      body = Poison.encode!(%{"keys" => [%{"some_key" => "some_value"}]})
+      %Tesla.Env{status: 200, body: body}
+    end
+
+    :ok
+  end
+
   describe "update_file/1" do
     test "Updates key in the given :ets table" do
       table = :ets.new(:test_table, [:set, :public, read_concurrency: true])
