@@ -47,8 +47,8 @@ defmodule Guachiman.Guardian do
   def verify_claims(claims, options)
 
   def verify_claims(claims, _options) do
-    with :ok <- verify_audience(claims),
-         :ok <- verify_scope(claims) do
+    #    with :ok <- verify_audience(claims),
+    with :ok <- verify_scope(claims) do
       {:ok, claims}
     end
   end

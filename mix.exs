@@ -21,17 +21,15 @@ defmodule Guachiman.MixProject do
     ]
   end
 
-  defp elixirc_paths(:dev) do
+  defp elixirc_paths(:test) do
     [
       "lib",
       "test"
     ]
   end
 
-  defp elixirc_paths(:test) do
-    [
-      "lib"
-    ]
+  defp elixirc_paths(:dev) do
+    elixirc_paths(:test)
   end
 
   defp elixirc_paths(_) do

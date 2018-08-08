@@ -5,29 +5,9 @@ defmodule Guachiman.GuardianTest do
 
   import Mox
 
-  #  import BitcloudDB.Factory
-
   setup do
-    #    :ok = Ecto.Adapters.SQL.Sandbox.checkout(BitcloudDB.Repo)
     :ok
   end
-
-  #  defmodule Guachiman.Resource.Valid do
-  #    @moduledoc false
-  #
-  #    @behaviour Guachiman.Resource
-  #
-  #    def get(subject), do: {:ok, subject}
-  #
-  #  end
-  #
-  #  defmodule Guachiman.Resource.Invalid do
-  #    @moduledoc false
-  #
-  #    @behaviour Guachiman.Resource
-  #    
-  #    def get(subject), do: {:error, :subject_not_found}
-  #  end
 
   describe "subject_for_token/2" do
     test "Returns ID when the resources has it" do
