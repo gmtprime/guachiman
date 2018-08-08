@@ -6,10 +6,10 @@ defmodule Guachiman.Auth0.Auth0Test do
   import Tesla.Mock
 
   setup do
-    mock fn _ ->
+    mock(fn _ ->
       body = Poison.encode!(%{"keys" => [%{"some_key" => "some_value"}]})
       %Tesla.Env{status: 200, body: body}
-    end
+    end)
 
     :ok
   end

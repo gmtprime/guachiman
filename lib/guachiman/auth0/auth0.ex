@@ -34,6 +34,7 @@ defmodule Guachiman.Auth0 do
 
   def fetch(table_name) do
     update_module = Settings.guachiman_update_module()
+
     with [] <- :ets.lookup(table_name, :key),
          :ok <- apply(update_module, :update_file, [table_name]) do
       fetch(table_name)

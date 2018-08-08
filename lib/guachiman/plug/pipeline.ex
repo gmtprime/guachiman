@@ -42,7 +42,7 @@ defmodule Guachiman.Plug.Pipeline do
   Similarly, you can also use `Guachiman.Plug.Pipeline` inline to set the audience
   as follows:
 
- 	### Inline pipelines
+  ### Inline pipelines
 
   If you want to define your pipeline inline, you can do so by using
   `Guachiman.Plug.Pipeline` as a plug itself.
