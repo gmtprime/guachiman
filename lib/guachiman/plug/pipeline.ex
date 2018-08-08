@@ -1,7 +1,7 @@
 defmodule Guachiman.Plug.MetaPipeline do
   @moduledoc """
-  Define a plug pipeline that incorporates `Guardian.Plug.Pipeline`
-  behavior, and use `guachiman` as its `otp_app`.
+  Defines a plug pipeline that applies `Guardian.Plug.Pipeline`
+  and use `:guachiman` as its `otp_app`.
   """
   defmacro __using__(options \\ []) do
     otp_app = Keyword.get(options, :otp_app, :guachiman)
@@ -12,14 +12,47 @@ defmodule Guachiman.Plug.MetaPipeline do
   end
 end
 
-defmodule Guachiman.Plug.BasePipeline do
-  use Guachiman.Plug.MetaPipeline
-end
-
 defmodule Guachiman.Plug.Pipeline do
   @moduledoc """
-  Define a plug pipeline that incorporates `Guardian.Plug.Pipeline`
-  behavior, and use `guachiman` as its `otp_app`.
+  Defines a plug pipeline that applies `Guardian.Plug.Pipeline` and
+  uses `:guachiman` as `otp_app`, `Guachiman.Guardian` as Guardian's
+  module and `Guachiman.AuthErrorHandler` as error handler for
+  `Guardian`.
+
+  The easiest way to use `Guachiman.Plug.Pipeline` is create a module to
+  define the custom pipeline.
+
+  ```elixir
+  defmodule MyCustomAuth0Pipeline do
+    use Guachiman.Plug.Pipeline
+
+  plug(Guardian.Plug.VerifyHeader, realm: "Bearer")
+  plug(Guachiman.Plug.EnsureAuthenticated)
+  ...
+
+  end
+  ```
+
+  Then, when you want to use the module, do the following:
+
+  ```elixir
+  plug MyCustomAuth0Pipeline, audience: "my_aut0_api_audience"
+  ```
+
+  Similarly, you can also use `Guachiman.Plug.Pipeline` inline to set the audience
+  as follows:
+
+ 	### Inline pipelines
+
+  If you want to define your pipeline inline, you can do so by using
+  `Guachiman.Plug.Pipeline` as a plug itself.
+
+  ```elixir
+  plug(Guachiman.Plug.Pipeline, audience: "my_aut0_api_audience")
+  plug(Guardian.Plug.VerifyHeader, realm: "Bearer")
+  plug(Guachiman.Plug.EnsureAuthenticated)
+    ```
+
   """
 
   defmacro __using__(options \\ []) do
@@ -39,8 +72,6 @@ defmodule Guachiman.Plug.Pipeline do
         module: unquote(module),
         error_handler: unquote(error_handler)
       )
-
-      # plug(:put_audience)
 
       def init(opts) do
         Pipeline.init(opts)
@@ -64,13 +95,6 @@ defmodule Guachiman.Plug.Pipeline do
     |> Keyword.put(:audience, audience)
   end
 
-  def config(opts) do
-    audience = get_audience(opts)
-
-    opts
-    |> Keyword.put(:audience, audience)
-  end
-
   @spec call(Plug.Conn.t(), Keyword.t()) :: Plug.Conn.t()
   def call(conn, opts) do
     conn
@@ -85,6 +109,11 @@ defmodule Guachiman.Plug.Pipeline do
   end
 
   @spec fetch_audience(Plug.Conn.t()) :: binary()
+  @doc """
+  Fetches the audience assigned to the pipeline.
+
+  Raises an error when the audience hasn't been set.
+  """
   def fetch_audience(conn) do
     audience = current_audience(conn)
 
