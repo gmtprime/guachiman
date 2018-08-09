@@ -24,7 +24,30 @@ defmodule Guachiman.Auth0.Sandbox.JWTToken do
     (...)
   end
   ```
+
+  ### Build token on different steps
+
+  You can build a %JWTToken{} struct using `build_token/2`, and then add
+  claims with `add_claim/3`.
+
+  ```
+  test "building token step by step" do
+    {:ok, token, claims} = build_token("some_resource_id")
+    |> add_claim("aud", "my_auth0_audience_api")
+    |> create()
+
+    assert claims["aud"] == "my_auth0_audience_api"
+  end
+
+  ```
+
+
   """
+  @enforce_keys [:resource_id]
+  defstruct [:resource_id, claims: %{}, algo: "RS256", secret: nil]
+  @type t :: %__MODULE__{resource_id: binary(), claims: map(), algo: binary()}
+
+  ### PUBLIC API
 
   @doc """
   Fetches the public key from the `"priv/jwt_keys"` folder.
@@ -49,7 +72,7 @@ defmodule Guachiman.Auth0.Sandbox.JWTToken do
   """
   @spec fetch_audience() :: binary() | list(binary())
   def fetch_audience do
-    Application.get_env(:guachiman, :audience, [])
+    Application.get_env(:guachiman, :audience, nil)
   end
 
   @doc """
@@ -60,9 +83,67 @@ defmodule Guachiman.Auth0.Sandbox.JWTToken do
           {:ok, Guardian.Token.token(), Guardian.Token.claims()}
           | {:error, any()}
   def create_token(resource_id, claims \\ %{}) do
-    new_claims = Map.put_new(claims, "aud", fetch_audience())
-    options = [allowed_algos: ["RS256"], secret: fetch_private_key()]
-    Guachiman.Guardian.encode_and_sign(%{id: resource_id}, new_claims, options)
+    #    new_claims = Map.put_new(claims, "aud", fetch_audience())
+    #    options = [allowed_algos: ["RS256"], secret: fetch_private_key()]
+    #    Guachiman.Guardian.encode_and_sign(%{id: resource_id}, new_claims, options)
+
+    build_token(resource_id, claims)
+    |> create()
+  end
+
+  @doc """
+  Build a new JWTToken struct with the given resource id
+  and claims.
+  """
+  @spec build_token(binary(), map()) :: __MODULE__.t()
+  def build_token(resource_id, claims \\ %{}) do
+    %__MODULE__{resource_id: resource_id, claims: claims}
+  end
+
+  @doc """
+  Puts a claim to the given JWTToken struct
+  """
+  @spec put_claim(__MODULE__.t(), atom(), any()) :: __MODULE__.t()
+  def put_claim(%__MODULE__{claims: claims} = token, key, value) do
+    new_claims = Map.put(claims, key, value)
+
+    %{token | claims: new_claims}
+  end
+
+  @doc """
+  Defines the secret to encode and sign this token.
+  """
+  @spec put_secret(__MODULE__.t(), term()) :: __MODULE__.t()
+  def put_secret(%__MODULE__{secret: nil} = token, secret: secret),
+    do: token |> Map.put(:secret, secret)
+
+
+  @doc """
+  Puts token signing algorithm.
+  """
+  @spec put_algorithm(__MODULE__.t(), term()) :: __MODULE__.t()
+  def put_algorithm(token, algo) do
+    token
+    |> Map.put(:algo, algo)
+  end
+
+
+  @doc """
+  Encodes and signs a new token using `Guachiman.Guardian.encode_and_sign`
+  given a `JWTToken` struct.
+  """
+  @spec create(__MODULE__.t()) ::
+          {:ok, Guardian.Token.token(), Guardian.Token.claims()}
+          | {:error, term()}
+  def create(token) do
+    %__MODULE__{resource_id: id, claims: claims, algo: algo, secret: secret} =
+      token
+      |> check_claims
+      |> check_secret
+
+    # Guardian expects a list as allowed_algos
+    options = [allowed_algos: [algo], secret: secret]
+    Guachiman.Guardian.encode_and_sign(%{id: id}, claims, options)
   end
 
   @doc """
@@ -76,5 +157,22 @@ defmodule Guachiman.Auth0.Sandbox.JWTToken do
       _ ->
         {:error, "Cannot update key"}
     end
+  end
+
+  ### HELPERS
+
+  # when secret is not set, use `fetch_private_key`
+  defp check_secret(%__MODULE__{secret: nil} = token),
+    do: token |> Map.put(:secret, fetch_private_key())
+
+  defp check_secret(token), do: token
+
+  # check for default claims
+  defp check_claims(%__MODULE__{claims: claims} = token) do
+    # add `aud` when it hasn't been set
+    new_claims = Map.put_new(claims, "aud", fetch_audience())
+
+    token
+    |> Map.put(:claims, new_claims)
   end
 end
