@@ -135,6 +135,11 @@ defmodule Guachiman.Plug.Pipeline do
 end
 
 defmodule Guachiman.Plug.Auth0Pipeline do
+  @moduledoc """
+  A pipeline that verifies the AUTH0's JWT token, ensure token's
+  `aud` claims is correct and load a resource using
+  Guachiman.Guardian module. See `Guachiman.Resource`.
+  """
   use Guachiman.Plug.Pipeline
 
   plug(Guardian.Plug.VerifyHeader, realm: "Bearer")
@@ -143,6 +148,10 @@ defmodule Guachiman.Plug.Auth0Pipeline do
 end
 
 defmodule Guachiman.Plug.Auth0AppsPipeline do
+  @moduledoc """
+  A pipeline to verify an AUTH0's JWT token and ensure
+  token's aud claims is the specified once.
+  """
   use Guachiman.Plug.Pipeline
 
   plug(Guardian.Plug.VerifyHeader, realm: "Bearer")

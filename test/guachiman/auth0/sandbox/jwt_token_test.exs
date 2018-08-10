@@ -22,16 +22,16 @@ defmodule Guachiman.Auth0.Sandbox.JWTTokenTest do
 
     test "Build token, add claims and create token" do
       audience = "my_auth0_audience"
-      assert {:ok, _token, %{"aud" => ^audience}} = 
-        build_token("my_resource_id")
-        |> put_claim("aud", audience)
-        |> create()
+
+      assert {:ok, _token, %{"aud" => ^audience}} =
+               build_token("my_resource_id")
+               |> put_claim("aud", audience)
+               |> create()
     end
 
     test "When not provide, the default audience is set as a claim" do
       audience = Application.get_env(:guachiman, :audience)
-      assert {:ok, _token, %{"aud" => ^audience}} =
-        create_token("resource_id")
+      assert {:ok, _token, %{"aud" => ^audience}} = create_token("resource_id")
     end
   end
 end

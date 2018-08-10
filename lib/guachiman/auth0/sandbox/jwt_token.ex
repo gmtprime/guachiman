@@ -117,7 +117,6 @@ defmodule Guachiman.Auth0.Sandbox.JWTToken do
   def put_secret(%__MODULE__{secret: nil} = token, secret: secret),
     do: token |> Map.put(:secret, secret)
 
-
   @doc """
   Puts token signing algorithm.
   """
@@ -126,7 +125,6 @@ defmodule Guachiman.Auth0.Sandbox.JWTToken do
     token
     |> Map.put(:algo, algo)
   end
-
 
   @doc """
   Encodes and signs a new token using `Guachiman.Guardian.encode_and_sign`
