@@ -1,9 +1,17 @@
 defmodule Guachiman.AuthErrorHandler do
   require Logger
 
+  alias Guachiman.Guardian.Plug, as: GPlug
+
   def auth_error(conn, {type, reason}, _opts) do
-    # TODO log client and reason the authentication failed
-    Logger.info("#{type} - #{reason}")
+    # log client_id (sub claim) of the request
+    client_id =
+      case GPlug.current_claims(conn) do
+        %{"sub" => sub} -> sub
+        _ -> "Unknown client_id"
+      end
+
+    Logger.info("#{client_id} - #{type} - #{reason}")
 
     msg =
       case reason do
