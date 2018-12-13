@@ -19,6 +19,7 @@ defmodule Guachiman.Plug.EnsureAuthenticated do
     options =
       GEnsureAuthenticated.init([])
       |> Keyword.put(:claims, claims)
+      |> GEnsureAuthenticated.init()
 
     GEnsureAuthenticated.call(conn, options)
   end

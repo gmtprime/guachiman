@@ -1,6 +1,6 @@
 defmodule Guachiman.Auth0 do
   @moduledoc """
-  Wraps AuthEx to request 1Bitcloud's Auth0 account.
+  Fetch JWKS.json file from Auth0 given an auth0_domain.
   """
   use GenServer
 

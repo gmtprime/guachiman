@@ -101,13 +101,6 @@ defmodule Guachiman.Plug.Pipeline do
     |> put_audience(opts)
   end
 
-  @doc false
-  @spec put_audience(Plug.Conn.t(), Keyword.t()) :: Plug.Conn.t()
-  def put_audience(conn, opts) do
-    conn
-    |> Plug.Conn.put_private(:guachiman_audience, Keyword.get(opts, :audience))
-  end
-
   @spec fetch_audience(Plug.Conn.t()) :: binary()
   @doc """
   Fetches the audience assigned to the pipeline.
@@ -125,6 +118,14 @@ defmodule Guachiman.Plug.Pipeline do
   end
 
   ### HELPERS
+
+  @spec put_audience(Plug.Conn.t(), Keyword.t()) :: Plug.Conn.t()
+  def put_audience(conn, opts) do
+    conn
+    |> Plug.Conn.put_private(:guachiman_audience, Keyword.get(opts, :audience))
+  end
+
+  @spec current_audience(Plug.Conn.t()) :: Plug.Conn.t()
   defp current_audience(conn), do: conn.private[:guachiman_audience]
 
   defp get_audience(opts) do
@@ -137,7 +138,7 @@ end
 defmodule Guachiman.Plug.Auth0Pipeline do
   @moduledoc """
   A pipeline that verifies the AUTH0's JWT token, ensure token's
-  `aud` claims is correct and load a resource using
+  `aud` claim is correct and load a resource using
   Guachiman.Guardian module. See `Guachiman.Resource`.
   """
   use Guachiman.Plug.Pipeline
